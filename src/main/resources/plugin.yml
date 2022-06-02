@@ -1,0 +1,4 @@
+name: CrystalRush
+version: '${version}'
+main: yashasr.minigame.Minigame
+api-version: 1.18
