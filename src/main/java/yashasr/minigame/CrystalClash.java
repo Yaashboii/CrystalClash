@@ -1,7 +1,6 @@
-package yashasr.minigame;
+package com.yashasr.minigame;
 
 import org.bukkit.Bukkit;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
@@ -16,7 +15,7 @@ import org.bukkit.inventory.ItemStack;
 
 
 public class CrystalClash implements CommandExecutor, Listener {
-    private Minigame plugin;
+    private MiniGame plugin = MiniGame.instance;
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
@@ -24,12 +23,10 @@ public class CrystalClash implements CommandExecutor, Listener {
             Msg.send(sender, "&cOnly players can use this command");
             return true;
         }
-        while(!plugin.getCrystalManager().victory(Bukkit.getPlayer(args[0]), Bukkit.getPlayer(args[1]))){
-            if(!plugin.getCrystalManager().isInFight(Bukkit.getPlayer(args[0])) && !plugin.getCrystalManager().isInFight(Bukkit.getPlayer(args[1]))){
+        if(!plugin.getCrystalManager().isInFight(Bukkit.getPlayer(args[0])) && !plugin.getCrystalManager().isInFight(Bukkit.getPlayer(args[1]))){
                 plugin.getCrystalManager().startFight(Bukkit.getPlayer(args[0]), Bukkit.getPlayer(args[1]));
             }
 
-        }
 
         return true;
     }
@@ -38,14 +35,21 @@ public class CrystalClash implements CommandExecutor, Listener {
         if(event.getEntity() instanceof EnderCrystal && event.getDamager() instanceof Player){
             if(plugin.getCrystalManager().isInFight((Player) event.getDamager())){
                 plugin.getCrystalManager().getFight((Player) event.getDamager()).onHit((Player) event.getDamager());
+                event.setCancelled(true);
             }
         }
 
         if(event.getEntity() instanceof Player && event.getDamager() instanceof Player){
+            if(plugin.getCrystalManager().getFight((Player) event.getEntity()) == null){
+                return;
+            }
+            plugin.getCrystalManager().getFight((Player) event.getEntity()).setZero((Player) event.getEntity());
 
-            plugin.getCrystalManager().getFight((Player) event.getEntity()).onHit((Player) event.getEntity());
         }
+
+
     }
+    @EventHandler
     public void onDeath(PlayerRespawnEvent event){
         event.getPlayer().getInventory().addItem(new ItemStack(Material.STONE_SWORD));
         event.getPlayer().getInventory().setChestplate((new ItemStack(Material.LEATHER_CHESTPLATE)));
